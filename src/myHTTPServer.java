@@ -10,9 +10,6 @@ public class myHTTPServer extends Thread {
                     "<title>HTTP Server in java</title>" +
                     "<body>";
 
-    public final static String RFC1123_PATTERN =
-            "EEE, dd MMM yyyyy HH:mm:ss z";
-
     static final String HTML_END =
             "</body>" +
                     "</html>";
