@@ -140,7 +140,7 @@ public class myHTTPServer extends Thread {
         }
 
         ServerSocket Server = new ServerSocket (port, 10, InetAddress.getByName("127.0.0.1"));
-        System.out.println ("TCPServer Waiting for client on port 5000");
+        System.out.println ("TCPServer Waiting for client on port " + port);
 
         while(true) {
             Socket connected = Server.accept();
