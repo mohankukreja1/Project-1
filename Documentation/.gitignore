@@ -1,0 +1,5 @@
+#Ignore LaTeX generation files
+/*.aux
+/*.log
+/*.synctex.gz
+/.vscode
