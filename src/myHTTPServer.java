@@ -112,7 +112,7 @@ public class myHTTPServer extends Thread {
         outToClient.writeBytes("\r\n");
         outToClient.writeBytes(contentTypeLine);
         outToClient.writeBytes(contentLengthLine);
-        outToClient.writeBytes("Date: " + date.toString());
+        outToClient.writeBytes("Date: " + date.toString() + "\r\n");
         outToClient.writeBytes("Connection: Keep-Alive\r\n");
         outToClient.writeBytes("\r\n");
 
@@ -134,7 +134,7 @@ public class myHTTPServer extends Thread {
 
     public static void main (String args[]) throws Exception {
 
-        int port = 10007;
+        int port = 5000;
         if(args.length > 0) {
             port = Integer.valueOf(args[0]);
         }
