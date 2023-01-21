@@ -92,7 +92,7 @@ public class myHTTPServer extends Thread {
         String contentLengthLine = null;
         String fileName = null;
         String contentTypeLine = "Content-Type: text/html" + "\r\n";
-        FileInputStream fin = null;
+        InputStream fin = null;
         ZonedDateTime date = ZonedDateTime.now();
 
         if (statusCode == 200)
@@ -123,41 +123,60 @@ public class myHTTPServer extends Thread {
         outToClient.writeBytes("Connection: Keep-Alive\r\n");
         outToClient.writeBytes("\r\n");
 
-        if (isFile) sendFile(fin, outToClient, range);
-        else outToClient.writeBytes(responseString);
+        if (statusCode == 206)  cutFile(range, fileName, outToClient);
+        else if (isFile)        sendFile(fin, outToClient);
+        else                    outToClient.writeBytes(responseString);
 
         outToClient.close();
     }
 
-    public void sendFile (FileInputStream fin, DataOutputStream out, String range) throws Exception {
+    public void sendFile (InputStream fin, DataOutputStream out) throws Exception {
         byte[] buffer = new byte[1024] ;
         int bytesRead;
 
-        if (true){ //if (range.length() == 0) {
-            while ((bytesRead = fin.read(buffer)) != -1 ) {
-                out.write(buffer, 0, bytesRead);
-            }
-            fin.close();
+        while ((bytesRead = fin.read(buffer)) != -1 ) {
+            out.write(buffer, 0, bytesRead);
         }
-        
-        /* else { //Cut the output into blocks
+        fin.close();
+    }
+
+    public void cutFile(String range, String fileName, DataOutputStream out){
+        try{
+            RandomAccessFile file = new RandomAccessFile(fileName, "r");
             String[] ranges = range.split(",");
             for(int i=0; i<ranges.length; i++){ //Loop through each range set
-                ranges[i] = ranges[i] + "-";
-                String[] endsString = ranges[i].split("-");
-                System.out.println(endsString[0]);
-
-                int[] ends = {0,0};
-                ends[0] += Integer.valueOf(endsString[0]); 
-                ends[1] += Integer.valueOf(endsString[1]);
-                System.out.println("ends" + ends[0]+" "+ends[1]);
-
-                while ((bytesRead = fin.read(buffer)) != -1 ) {
-                    out.write(buffer, 0, bytesRead);
+                String begining = ranges[i].substring(0, ranges[i].indexOf("-"));
+                String end      = ranges[i].substring(ranges[i].indexOf("-")+1, ranges[i].length());
+                int start;
+                int finish;
+                if(begining.length() == 0){ // -last case
+                    start = (int) file.length() - Integer.parseInt(end);
+                    finish = (int) file.length();
+                } else if(end.length() == 0){ // begin- case
+                    start = Integer.parseInt(begining);
+                    finish = (int) file.length();
+                } else { // start-finish case
+                    start = Integer.parseInt(begining);
+                    finish = Integer.parseInt(end);
                 }
+                if(start>finish) throw new Exception("Invalid byte range request");
+                
+                byte[] data = new byte[finish-start+1];
+                file.seek(start);
+                int dataSize = file.read(data);
+                out.write(data, 0, dataSize);
+
+                /*System.out.println("Range: " +start+" "+finish);
+                System.out.print("Data: ");
+                for(int j=0;j<data.length;j++){
+                    System.out.print((char) data[j]+" ");
+                }
+                System.out.println("Datasize: " + dataSize);*/
             }
-            fin.close();
-        }*/
+            file.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }        
     }
 
     public static void main (String args[]) throws Exception {
