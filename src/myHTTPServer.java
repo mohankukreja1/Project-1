@@ -103,6 +103,10 @@ public class myHTTPServer extends Thread {
         String acceptRange = null;
         String contentRange = null;
         ZonedDateTime date = ZonedDateTime.now();
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String lastModifiedTime = null;
 
         if (statusCode == 200)
             statusLine = "HTTP/1.1 200 OK" + "\r\n";
@@ -114,6 +118,8 @@ public class myHTTPServer extends Thread {
         if (isFile) {
             fileName = responseString;
             fin = new FileInputStream(fileName);
+            File file = new File(fileName);
+            lastModifiedTime = dateFormat.format(new Date(file.lastModified())).toString();
             contentLengthLine = "Content-Length: " + Integer.toString(fin.available()) + "\r\n";
             if (fileName.endsWith(".html")) {
                 contentTypeLine = "Content-Type: text/html\r\n";
@@ -141,6 +147,7 @@ public class myHTTPServer extends Thread {
             contentLengthLine = "Content-Length: " + responseString.length() + "\r\n";
             acceptRange = "Accept-Ranges: 0-" + responseString.getBytes().length +  "\r\n";
             contentRange = "Content-Ranges: 0-" + responseString.getBytes().length +  "\r\n";
+            lastModifiedTime = getServerTime();
         }
 
         outToClient.writeBytes(statusLine);
@@ -148,8 +155,10 @@ public class myHTTPServer extends Thread {
         outToClient.writeBytes("\r\n");
         outToClient.writeBytes(contentTypeLine);
         outToClient.writeBytes(contentLengthLine);
+        outToClient.writeBytes(lastModifiedTime);
         outToClient.writeBytes(acceptRange);
         outToClient.writeBytes(contentRange);
+        outToClient.writeBytes("Range: " + range + "\r\n");
         outToClient.writeBytes("Date: " + getServerTime() + "\r\n");
         outToClient.writeBytes("Connection: keep-alive\r\n");
         outToClient.writeBytes("\r\n");
