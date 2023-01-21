@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -17,18 +19,21 @@ public class myHTTPServer extends Thread {
     Socket connectedClient = null;
     BufferedReader inFromClient = null;
     DataOutputStream outToClient = null;
+    int port = -1;
 
 
-    public myHTTPServer(Socket client) {
+    public myHTTPServer(Socket client, int port)
+    {
         connectedClient = client;
+        this.port = port;
     }
 
     public void run() {
 
         try {
 
-            System.out.println( "The Client "+
-                    connectedClient.getInetAddress() + ":" + connectedClient.getPort() + " is connected");
+            System.out.println( "TCPClient "+
+                    connectedClient.getInetAddress() + ":" + connectedClient.getPort() + " is connected to the server");
 
             inFromClient = new BufferedReader(new InputStreamReader (connectedClient.getInputStream()));
             outToClient = new DataOutputStream(connectedClient.getOutputStream());
@@ -43,16 +48,12 @@ public class myHTTPServer extends Thread {
             String httpRange = "";
 
             StringBuffer responseBuffer = new StringBuffer();
-            responseBuffer.append("<b> This is the HTTP Server Home Page.... </b><BR>");
-            responseBuffer.append("The HTTP Client request is ....<BR>");
-
-            System.out.println("The HTTP request string is ....");
+            responseBuffer.append("<i> This is the my HTTP Server Main Page.... </i><BR>");
             while (inFromClient.ready())
             {
                 if (requestString.contains("Range:")){// Isolate range string
                     httpRange = requestString;
                 }
-                // Read the HTTP complete HTTP Query
                 responseBuffer.append(requestString + "<BR>");
                 System.out.println(requestString);
                 requestString = inFromClient.readLine();
@@ -73,16 +74,22 @@ public class myHTTPServer extends Thread {
                             sendResponse(200, fileName, true, "");
                         }
                     } else {
-                        sendResponse(404, "<b>The Requested resource not found ...." +
-                                "Usage: http://127.0.0.1:5000 or http://127.0.0.1:5000/</b>", false, "");
+                        sendResponse(404, "<b>The Requested resource not found ....", false, "");
                     }
                 }
             }
-            else sendResponse(404, "<b>The Requested resource not found ...." +
-                    "Usage: http://127.0.0.1:5000 or http://127.0.0.1:5000/</b>", false, "");
+            else sendResponse(404, "<b>The Requested resource not found ....", false, "");
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    String getServerTime() {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return dateFormat.format(calendar.getTime());
     }
 
     public void sendResponse (int statusCode, String responseString, boolean isFile, String range) throws Exception {
@@ -93,6 +100,8 @@ public class myHTTPServer extends Thread {
         String fileName = null;
         String contentTypeLine = "Content-Type: text/html" + "\r\n";
         InputStream fin = null;
+        String acceptRange = null;
+        String contentRange = null;
         ZonedDateTime date = ZonedDateTime.now();
 
         if (statusCode == 200)
@@ -106,12 +115,32 @@ public class myHTTPServer extends Thread {
             fileName = responseString;
             fin = new FileInputStream(fileName);
             contentLengthLine = "Content-Length: " + Integer.toString(fin.available()) + "\r\n";
-            if (!fileName.endsWith(".htm") && !fileName.endsWith(".html"))
-                contentTypeLine = "Content-Type: \r\n";
+            if (fileName.endsWith(".html")) {
+                contentTypeLine = "Content-Type: text/html\r\n";
+            } else if(fileName.endsWith(".jpeg")) {
+                contentTypeLine = "Content-Type: image/jpeg\r\n";
+            } else if(fileName.endsWith(".css")) {
+                contentTypeLine = "Content-Type: text/css\r\n";
+            } else if(fileName.endsWith(".gif")) {
+                contentTypeLine = "Content-Type: image/gif\r\n";
+            } else if(fileName.endsWith(".mp4")) {
+                contentTypeLine = "Content-Type: video/mp4\r\n";
+            } else if(fileName.endsWith(".png")) {
+                contentTypeLine = "Content-Type: image/png\r\n";
+            } else if(fileName.endsWith(".txt")) {
+                contentTypeLine = "Content-Type: text/txt\r\n";
+            } else if(fileName.endsWith("..webm")) {
+                contentTypeLine = "Content-Type: application/octet-stream\r\n";
+            }
+            byte[] byteArray = new byte[fin.available()];
+            acceptRange = "Accept-Ranges: 0-" + byteArray.length +  "\r\n";
+            contentRange = "Content-Ranges: 0-" + byteArray.length +  "\r\n";
         }
         else {
             responseString = myHTTPServer.HTML_START + responseString + myHTTPServer.HTML_END;
             contentLengthLine = "Content-Length: " + responseString.length() + "\r\n";
+            acceptRange = "Accept-Ranges: 0-" + responseString.getBytes().length +  "\r\n";
+            contentRange = "Content-Ranges: 0-" + responseString.getBytes().length +  "\r\n";
         }
 
         outToClient.writeBytes(statusLine);
@@ -119,8 +148,10 @@ public class myHTTPServer extends Thread {
         outToClient.writeBytes("\r\n");
         outToClient.writeBytes(contentTypeLine);
         outToClient.writeBytes(contentLengthLine);
-        outToClient.writeBytes("Date: " + date.toString() + "\r\n");
-        outToClient.writeBytes("Connection: Keep-Alive\r\n");
+        outToClient.writeBytes(acceptRange);
+        outToClient.writeBytes(contentRange);
+        outToClient.writeBytes("Date: " + getServerTime() + "\r\n");
+        outToClient.writeBytes("Connection: keep-alive\r\n");
         outToClient.writeBytes("\r\n");
 
         if (statusCode == 206)  cutFile(range, fileName, outToClient);
@@ -149,10 +180,10 @@ public class myHTTPServer extends Thread {
                 String end      = ranges[i].substring(ranges[i].indexOf("-")+1, ranges[i].length());
                 int start;
                 int finish;
-                if(begining.length() == 0){ // -last case
+                if(begining.length() == 0){ // last-case
                     start = (int) file.length() - Integer.parseInt(end);
                     finish = (int) file.length();
-                } else if(end.length() == 0){ // begin- case
+                } else if(end.length() == 0){ // begin-case
                     start = Integer.parseInt(begining);
                     finish = (int) file.length();
                 } else { // start-finish case
@@ -165,13 +196,6 @@ public class myHTTPServer extends Thread {
                 file.seek(start);
                 int dataSize = file.read(data);
                 out.write(data, 0, dataSize);
-
-                /*System.out.println("Range: " +start+" "+finish);
-                System.out.print("Data: ");
-                for(int j=0;j<data.length;j++){
-                    System.out.print((char) data[j]+" ");
-                }
-                System.out.println("Datasize: " + dataSize);*/
             }
             file.close();
         } catch (Exception e) {
@@ -187,11 +211,11 @@ public class myHTTPServer extends Thread {
         }
 
         ServerSocket Server = new ServerSocket (port, 10, InetAddress.getByName("127.0.0.1"));
-        System.out.println ("TCPServer Waiting for client on port " + port);
+        System.out.println ("HttpServer started on port: " + port);
 
         while(true) {
             Socket connected = Server.accept();
-            (new myHTTPServer(connected)).start();
+            (new myHTTPServer(connected, port)).start();
         }
     }
 }
