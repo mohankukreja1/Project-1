@@ -41,12 +41,12 @@ No external libraries where used only java packages.
 \end{itemize}
 
 \section{Extra Capabilities}
-Our design focused on being extremely scaleable. Our implementation of multithreading should allow for many simultaneous requests at once without using up resources at idle. 
+Our design focused on being extremely scaleable. Our implementation of multithreading should allow for many simultaneous requests at once without using up resources at idle.
 
 Another extra capability is requesting multiple byte ranges. Our server can respond to any set of ranges, including ranges that overlap and will send the data in each range in the order the ranges where in. For example when requsting from a file with "0123456789", a request of "Range: bytes=8-,0-1,0-4,-1" would respond with "8901012349".
 
 \section{Extra Instructions}
-\textit{v Extra instructions on how to execute the code, if needed (WARNING: if we cannot compile and run your server on our cluster machine with the above execution method, your logistic points will be deducted. However, please do tell us any runtime parameter your server may have which may help in tuning)}
+\textit{All the compilation instructions are present in the readme.md file in the src folder. We have created a parametrized shell script to start the server directly. Details are present in the readme file.)}
 
 
 
