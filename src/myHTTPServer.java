@@ -1,6 +1,5 @@
 import java.io.*;
 import java.net.*;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -20,8 +19,6 @@ public class myHTTPServer extends Thread {
     BufferedReader inFromClient = null;
     DataOutputStream outToClient = null;
     int port = -1;
-
-
     public myHTTPServer(Socket client, int port)
     {
         connectedClient = client;

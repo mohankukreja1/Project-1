@@ -1,1 +1,0 @@
-java src/myHTTPServer.java "$1"
