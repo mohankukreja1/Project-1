@@ -9,7 +9,7 @@
 
 3. Run the command $ant in the project1 dir
 
-4. Run the command $edu.uw.ece.VodServer <port> in the project1 dir
+4. Run the command $java edu.uw.ece.VodServer <port> in the project1 dir
 
 5. Test the server using localhost:<port>
 
@@ -53,3 +53,5 @@
 ## Notes
 
 1. curl may requier the removal of an alias on windows powershell $Remove-item alias:curl
+
+2. Tested using Java 17.0.2

@@ -53,10 +53,17 @@ Another extra capability is requesting multiple byte ranges. Our server can resp
     
     \item Run the command \$ant in the project1 dir
     
-    \item Run the command \$edu.uw.ece.VodServer <port> in the project1 dir
+    \item Run the command \$java edu.uw.ece.VodServer <port> in the project1 dir
     
     \item Test the server using localhost:<port>
     
+\end{itemize}
+
+\section{Extra Notes}
+\begin{itemize}
+    \item Curl may require the removal of an alias on windows powershell \$Remove-item alias:curl
+
+    \item Tested using Java 17.0.2
 \end{itemize}
 
 
