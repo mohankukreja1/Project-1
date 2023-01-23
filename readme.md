@@ -1,5 +1,20 @@
 ## CSE 565 Project-1 Http Server
 
+
+## How to run
+
+1. Extract submitted zip folder project1.zip
+
+2. Copy content into the unzipped project1 directory.
+
+3. Run the command $ant in the project1 dir
+
+4. Run the command $edu.uw.ece.VodServer <port> in the project1 dir
+
+5. Test the server using localhost:<port>
+
+## Testing
+
 1. 200 Response-
 
     1.1 curl "127.0.0.1:5000/html/text.html" -v (Html File)
@@ -33,3 +48,8 @@
 6. Stress Testing
    
     More than 500 concurrent clients
+
+
+## Notes
+
+1. curl may requier the removal of an alias on windows powershell $Remove-item alias:curl

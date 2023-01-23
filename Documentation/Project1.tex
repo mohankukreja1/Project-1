@@ -12,7 +12,7 @@
 \maketitle
 
 \section{Multiple Clients}
-Our server uses a multithreaded response design. The program starts by intitializing and entering in a main loop indefinitily. In this loop when new client connects a socket is created for it and passed on to a thread. Our server class extends thread which calls the run() method . \\
+Our server uses a multithreaded response design. The program starts by intitializing and entering in a main loop indefinitily. In this loop when new client connects a socket is created for it and passed on to a thread. Our server class extends thread which calls the run() method. \\
 
 \section{Server Design}
 Each thread only deals with one client request. The thread starts off by initializing and building out its response buffer. Then the thread enters into a control structure for requests for: GET, GET a file, GET a partial file, or an unsupported request. Once the server knows what the request is for it begins to send its response with sendResponse(). Each of these has differnt behaivior.
@@ -45,12 +45,19 @@ Our design focused on being extremely scaleable. Our implementation of multithre
 
 Another extra capability is requesting multiple byte ranges. Our server can respond to any set of ranges, including ranges that overlap and will send the data in each range in the order the ranges where in. For example when requsting from a file with "0123456789", a request of "Range: bytes=8-,0-1,0-4,-1" would respond with "8901012349".
 
-\section{Extra Instructions}
-\textit{All the compilation instructions are present in the readme.md file in the src folder. We have created a parametrized shell script to start the server directly. Details are present in the readme file.)}
+\section{Instructions}
+\begin{itemize}
+    \item Extract submitted zip folder project1.zip
 
-
-
-
+    \item Copy testing content folder into the unzipped project1 directory.
+    
+    \item Run the command \$ant in the project1 dir
+    
+    \item Run the command \$edu.uw.ece.VodServer <port> in the project1 dir
+    
+    \item Test the server using localhost:<port>
+    
+\end{itemize}
 
 
 

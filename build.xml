@@ -1,0 +1,22 @@
+<project name="vodserver" basedir="." default="compile">
+    <description>
+        Ant Buildfile for making our server. Team members are Parshva Jhaveri, Mohan Kukreja, and Cameron McCarty.
+    </description>
+
+    <property name="folder" location="edu/uw/ece"/>
+    <property name="src" location="src"/>
+    <property name="file" value="VodServer"/>
+
+    <target name="mkdir" description="makes dirctory structure">
+        <mkdir dir="${folder}"/>
+    </target>
+
+    <target name="compile" description="Compiles server" depends="clean">
+        <mkdir dir="${folder}"/>
+        <javac srcdir="." fork="true" destdir="."/>
+    </target>
+
+    <target name="clean" description="removes compiled material">
+        <delete dir="edu"/>
+    </target>
+</project>
